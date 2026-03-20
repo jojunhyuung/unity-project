@@ -6,6 +6,9 @@ public class PlayerMovement : MonoBehaviour
 {
     float PlayerSpeed = 5f;
     float rotateSpeed = 200f;
+    float gravity = -20f;
+
+    float yVelocity;
 
     CharacterController controller;
 
@@ -21,9 +24,28 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 move = new Vector3(h, 0, v);
 
-        controller.Move(move * PlayerSpeed * Time.deltaTime);
+        // 🔹 중력 처리
+        if (controller.isGrounded)
+        {
+            if (yVelocity < 0)
+                yVelocity = -2f;
+        }
+        else
+        {
+            yVelocity += gravity * Time.deltaTime;
+        }
 
-        if(move.sqrMagnitude > 0.01f)
+        // 🔹 최종 이동 벡터
+        Vector3 finalMove = new Vector3(
+            move.x * PlayerSpeed,
+            yVelocity,
+            move.z * PlayerSpeed
+        );
+
+        controller.Move(finalMove * Time.deltaTime);
+
+        // 🔹 회전
+        if (move.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
             transform.rotation = Quaternion.RotateTowards(
